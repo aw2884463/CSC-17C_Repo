@@ -14,6 +14,7 @@
 #include <queue>
 
 #include "battleship.h"
+#include "Graph.h"
 
 
 using namespace std;
@@ -217,6 +218,13 @@ bool battleship::checkFull(int cNum,list<pair<int,int>>& shipMap,int index, ship
 void battleship::placeShip(ship& ship, set<pair<int,int>>& board,list<pair<int,int>>& shipMap) {
     
     int x,y,r;
+    Graph g(10);
+    
+    for(int i = 0 ; i < 10;i++) {
+        for(int j = 0;j < 10;j++) {
+            g.addEdge(i,j);
+        }
+    }
     cout << endl <<"Where would you like to place your ship reference from point (1,1) of your ship" <<endl;
     cout << "Remember the board is a 10x10 (1,1)-(10,10)" <<endl;
     cout <<"Enter the row coordinate for your placement(top->bottom)" << endl;
@@ -228,7 +236,7 @@ void battleship::placeShip(ship& ship, set<pair<int,int>>& board,list<pair<int,i
     cin >> r;
     cin.clear();
     cin.ignore(100, '\n');
-    if(x <= 10 && y <= 10 && r <= 4 && x >=1 && y >= 1 && r >=1) {
+    if(g.findNode(x,y) && r >=1 && r <= 4) {
         switch(r) {
             case 1:
                 if(y-ship.size >= 0) {
@@ -350,25 +358,38 @@ set<pair<int,int>>::iterator battleship::getCoord(set<pair<int,int>>& v,int x,in
     return find(v.begin(), v.end(), pair<int,int>(x,y));
 }
 
+void battleship::recordShot(int pNum) {
+    
+    
+    
+}
+
 
 void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMap, ship* ships, map<char,int>& stats) {
     
     int r = 0,
         c = 0,
         index = 0;
-    while(r < 1 || r > 10 || c < 1 || c > 10) {
+    Graph g(10);
+    
+    for(int i = 0 ; i < 10;i++) {
+        for(int j = 0;j < 10;j++) {
+            g.addEdge(i,j);
+        }
+    }
+    do {
         cout << "Where would you like to send you shot?" << endl;
         cout << "Enter the row coordinate now" <<endl;
         cin >> r;
         cout << "Enter the column coordinate now" <<endl;
         cin >> c;
-        
         cin.clear();
         cin.ignore(100, '\n');
         if(r < 1 || r > 10 || c < 1 || c > 10) {
             cout << "Invalid coordinate" << endl;
-        }      
+        }         
     }
+    while(!g.findNode(r,c));
     index = createIndex(board,getCoord(board,r,c));
     //cout << index;
     list<pair<int,int>>::iterator it = shipMap.begin();

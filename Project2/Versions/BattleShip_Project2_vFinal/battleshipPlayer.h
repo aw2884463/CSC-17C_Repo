@@ -16,6 +16,7 @@
 
 
 #include "ship.h"
+#include "AVLTree.h"
 
 using namespace std;
 
@@ -24,6 +25,7 @@ using namespace std;
 
 class battleshipPlayer {
 public:
+    AVLTree shots;
     battleshipPlayer();
     battleshipPlayer(const battleshipPlayer& orig);
     virtual ~battleshipPlayer();
@@ -37,6 +39,7 @@ private:
     list<pair<int,int>> pMap;
     map<char,int> stat;
     ship* ships;
+    
 };
 
 #endif /* BATTLESHIPPLAYER_H */

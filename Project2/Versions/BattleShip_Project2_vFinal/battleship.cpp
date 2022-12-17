@@ -10,9 +10,6 @@
  * Created on November 5, 2022, 5:25 PM
  */
 
-#include <stack>
-#include <queue>
-
 #include "battleship.h"
 
 
@@ -28,100 +25,171 @@ battleship::battleship(const battleship& orig) {
 battleship::~battleship() { 
 }
 
-void battleship::trackpNames() {
+int battleship::NumHash(string hashString) {
     
-  ofstream outfile;
-  queue<string> names;
-  string temp;
-  outfile.open("names.txt", ios::app); // append instead of overwrite
-  cout << "Hello can we have each player enter there names now" << endl;
-  for(int i = 0;i < 2;i++) {
-      cout << "Player #" << i+1 << " enter you name now." << endl;
-      cin >> temp;
-      names.push(temp);
-  }  
-  for(int i = 0;i < 2;i++) {
-     outfile << names.front() << endl;
-     names.pop();
-  }
-  outfile << endl;
-  outfile.close();
+    int hash = 0;
+    //hash = ((char2int(hashString[0]) + char2int(hashString[1]))*(char2int(hashString[0]) + char2int(hashString[1]) + 1)/2) + char2int(hashString[1]);
+    for(int i = 0;i < hashString.length();i++) {
+        if(i == 0) {
+           hash += char2int(hashString[i]) * hashString[i] + hashString[i + 1];
+        }
+        else if(i == 1) {
+           hash += char2int(hashString[i]) * hashString[i] + hashString[i - 1]; 
+        }
+        else {
+            hash += char2int(hashString[i]);
+        }
+    }
+    return hash;
+}
+
+int battleship::char2int(char c) {
+    
+    
+    if(c == 'A' || c == 'B' || c == 'C') {
+        return 2;
+    }
+    else if (c == 'D' || c == 'E' || c == 'F') {
+        return 3;
+    }
+    else if (c == 'G' || c == 'H' || c == 'I') {
+        return 4;
+    }
+    else if (c == 'J' || c == 'K' || c == 'L') {
+        return 5;
+    }
+    else if (c == 'M' || c == 'N' || c == 'O') {
+        return 6;
+    }
+    else if (c == 'P' || c == 'Q' || c == 'R' || c == 'S') {
+        return 7;
+    }
+    else if (c == 'T' || c == 'U' || c == 'V') {
+        return 8;
+    }
+    else {
+        return 9;
+    }
+}
+
+Node** battleship::trackpNames() {
+    
+    HashTable HT;
+    Node **table = NULL;
+    int size = 13;
+    string *names = new string[2];
+
+    cout << "Hello can we have each player enter there names now" << endl;
+    names[0] = "Player One";
+    names[1] = "Player Two";
+    table = HT.insrtNode(names,2,size);
+    for(int i = 0;i < 2;i++) {
+        cout << "Player #" << i+1 << " enter you name now." << endl;
+        cin >> names[i];
+    }  
+    table[HT.ClayHash("Player One")% size]->data = names[0];
+    table[HT.ClayHash("Player Two")% size]->data = names[1];
+    
+//  outfile << endl;
+//  outfile.close();
+    return table;
 };
 
-void battleship::printpNames() {
-    
-  ifstream infile;
-  stack<string> names;
-  string temp;
-  infile.open("names.txt", ios::out); // output
-  while(getline(infile,temp)) {
-      names.push(temp);
-  }
-  infile.close();
-  int size = names.size();
-  for(int i = 0;i < size;i++) {
-      cout  << names.top() << endl;
-      names.pop();
-  } 
-  cout << endl;
-};
+
+// A function to implement bubble sort
+void battleship::bubbleSort(pair<int,int> arr[], int n)
+{
+    // Base case
+    if (n == 1)
+        return;
+ 
+    int count = 0;
+    // One pass of bubble sort. After
+    // this pass, the largest element
+    // is moved (or bubbled) to end.
+    for (int i=0; i<n-1; i++)
+        if (arr[i] > arr[i+1]){
+            swap(arr[i], arr[i+1]);
+            count++;
+        }
+ 
+      // Check if any recursion happens or not
+      // If any recursion is not happen then return
+      if (count==0)
+           return;
+ 
+    // Largest element is fixed,
+    // recur for remaining array
+    bubbleSort(arr, n-1);
+}
 
 void battleship::startGame() {
     bool gameOver = false;
+    HashTable table;
+    Node** players;
     cout << "Welcome to my battleship game. Hope you like it!" << endl;
-    trackpNames();
-    cout << "Lets Begin. Well have player one place there ships now." << endl << endl;
+    players = trackpNames();
+    cout << "Lets Begin. Well have " << players[table.ClayHash("Player One") % 13]->data << " place there ships now." << endl << endl;
     printShipMap(p1.getMap(),true);
    for(int i =0;i < 5;i++) {
-       //ship* temp = p1.getShips();
         cout << "Your ship has a length of :" << p1.getShips()[i].size << endl; 
         placeShip(p1.getShips()[i],coords,p1.getMap());
     }
-    cout << "Great. Now lets let player two place there ships." << endl;
+    cout << "Great. Well have " << players[table.ClayHash("Player Two") % 13]->data << " place there ships now." << endl;
     printShipMap(p2.getMap(),true);
     for(int i =0;i < 5;i++) {
         cout << "Your ship has a length of :" << p2.getShips()[i].size << endl; 
         placeShip(p2.getShips()[i],coords,p2.getMap());
     }
     cout << "Now that the ship's have been place lets start getting to the action!!!" << endl;
+    
     while(!gameOver) {
         
-        cout << "Player one will now shoot there shot!" << endl;
-        cout << "Here is your view of player twos map." << endl;
+        cout << players[table.ClayHash("Player One") % 13]->data << " will now shoot there shot!" << endl;
+        cout << "Here is your view of " << players[table.ClayHash("Player Two") % 13]->data << "'s map." << endl;
         printShipMap(p2.getMap(),false);
-        shootShip(coords,p2.getMap(),p2.getShips(),p1.getStat());
+        shootShip(coords,p2.getMap(),p2.getShips(),p1.getStat(),p1.shots);
         printShipMap(p2.getMap(),false);
         if (checkLoss(p2.getShips())) {
-            cout << "Player one wins by sinking the ships.";
+            cout << players[table.ClayHash("Player One") % 13]->data << " wins by sinking the ships.";
             gameOver = true;
             break;
         }
-        cout << "Player two will now shoot there shot!" << endl;
-        cout << "Here is your view of player ones map." << endl;
+        cout << players[table.ClayHash("Player Two") % 13]->data << " will now shoot there shot!" << endl;
+        cout << "Here is your view of " << players[table.ClayHash("Player One") % 13]->data << "'s map." << endl;
         printShipMap(p1.getMap(),false);
-        shootShip(coords,p1.getMap(),p1.getShips(),p2.getStat());
+        shootShip(coords,p1.getMap(),p1.getShips(),p2.getStat(),p2.shots);
         printShipMap(p1.getMap(),false);
         if (checkLoss(p1.getShips())) {
-            cout << "Player two wins by sinking the ships.";
+            cout << players[table.ClayHash("Player Two") % 13]->data << " wins by sinking the ships.";
             gameOver = true;
             break;
         }   
     }
     
     cout << endl << "Now lets see some stats." << endl;
-    cout << "Player One:" << endl;
+    cout << players[table.ClayHash("Player One") % 13]->data<< endl;
     printStat(p1.getStat());
-    cout  << endl << "Player Two:" << endl;
+    cout  << players[table.ClayHash("Player Two") % 13]->data<< endl;
     printStat(p2.getStat());
     
     int choice = 0;
     while(choice < 1 || choice > 2) {
-        cout  << endl << "Would you like to see the log off all the players. (1-Yes) (2-No)" << endl;
+        cout  << endl << "Would you like to see the log off all positions that were shot. (1-Yes) (2-No)" << endl;
         cin >> choice;
         if(choice == 1 || choice == 2) {
             if(choice == 1) {
-                printpNames();
+                AVLTree p1Shots = p1.shots;
+                AVLTree p2Shots = p2.shots;
+                p1Shots.balance(p1Shots.root);
+                p2Shots.balance(p2Shots.root);
                 
+                cout << "Here is the view of " << players[table.ClayHash("Player One") % 13]->data <<"'s shot history." << endl;
+                p1Shots.inorder(p1Shots.root);
+                cout << endl;
+                cout << "Here is the view of " << players[table.ClayHash("Player Two") % 13]->data <<"'s shot history." << endl;
+                p2Shots.inorder(p2Shots.root);
+                cout << endl;
             }
             else {
                 cout << "Your loss." << endl;
@@ -217,6 +285,13 @@ bool battleship::checkFull(int cNum,list<pair<int,int>>& shipMap,int index, ship
 void battleship::placeShip(ship& ship, set<pair<int,int>>& board,list<pair<int,int>>& shipMap) {
     
     int x,y,r;
+    Graph g(11);
+    
+    for(int i = 1 ; i <= 10;i++) {
+        for(int j = 1;j <= 10;j++) {
+            g.addEdge(i,j);
+        }
+    }
     cout << endl <<"Where would you like to place your ship reference from point (1,1) of your ship" <<endl;
     cout << "Remember the board is a 10x10 (1,1)-(10,10)" <<endl;
     cout <<"Enter the row coordinate for your placement(top->bottom)" << endl;
@@ -228,7 +303,7 @@ void battleship::placeShip(ship& ship, set<pair<int,int>>& board,list<pair<int,i
     cin >> r;
     cin.clear();
     cin.ignore(100, '\n');
-    if(x <= 10 && y <= 10 && r <= 4 && x >=1 && y >= 1 && r >=1) {
+    if(g.findNode(x,y) && r >=1 && r <= 4) {
         switch(r) {
             case 1:
                 if(y-ship.size >= 0) {
@@ -351,24 +426,30 @@ set<pair<int,int>>::iterator battleship::getCoord(set<pair<int,int>>& v,int x,in
 }
 
 
-void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMap, ship* ships, map<char,int>& stats) {
-    
+void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMap, ship* ships, map<char,int>& stats, AVLTree& shots) {
     int r = 0,
         c = 0,
         index = 0;
-    while(r < 1 || r > 10 || c < 1 || c > 10) {
+    Graph g(11);
+    
+    for(int i = 1 ; i <= 10;i++) {
+        for(int j = 1;j <= 10;j++) {
+            g.addEdge(i,j);
+        }
+    }
+    do {
         cout << "Where would you like to send you shot?" << endl;
         cout << "Enter the row coordinate now" <<endl;
         cin >> r;
         cout << "Enter the column coordinate now" <<endl;
         cin >> c;
-        
         cin.clear();
         cin.ignore(100, '\n');
         if(r < 1 || r > 10 || c < 1 || c > 10) {
-            cout << "Invalid coordinate" << endl;
-        }      
+            cout << "Invalid coordinate" << " here"<< endl;
+        }         
     }
+    while(!g.findNode(r,c));
     index = createIndex(board,getCoord(board,r,c));
     //cout << index;
     list<pair<int,int>>::iterator it = shipMap.begin();
@@ -381,11 +462,9 @@ void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMa
         cout << "You missed try harder next time." << endl;
         setShipMap(shipMap,index,8,8);
         pushStat('M',stats);
-        return;
     }
-    if(temp.first == 8 || temp.first == 9) {
+    else if(temp.first == 8 || temp.first == 9) {
         cout << "You have already shot here. How do you mess up that bad?" << endl;
-        return;
     }
     else {
         cout << "You hit ship #" << temp.first << endl;
@@ -398,9 +477,9 @@ void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMa
 //        cout << endl;
         checkSunk(ships[temp.first - 1]);
         setShipMap(shipMap,index,9,8);
-        return;
     }
-    
+    string tCoord = "(" + to_string(r) + "," + to_string(c) + ")";
+    shots.root = shots.insert(shots.root,tCoord);
 }
 
 bool battleship::checkLoss(ship* ships) {
@@ -435,6 +514,7 @@ set<pair<int,int>> battleship::createCoords() {
     }
     return temp;
 }
+
 void battleship::setShipMap(list<pair<int,int>>&v,int i,int x,int y) {
     list<pair<int,int>>::iterator it = v.begin();
     for(int n =0;n < i;n++) {
@@ -492,8 +572,8 @@ void battleship::printCoords(set<pair<int,int>>&v) {
             cout << endl;
         }
         pair<int,int> temp = *it;
-        cout << "(" << temp.first << "," << temp.second << ")  ";
         count++;
+        cout << "(" << temp.first << "," << temp.second << ")  ";
     }
     cout << endl << endl;
 }

@@ -10,6 +10,12 @@
  * Created on October 23, 2022, 7:58 AM
  */
 
+
+#include <iterator>
+#include <list>
+#include <iterator>
+#include <string>
+
 #include "battleship.h"
 
 using namespace std;
@@ -20,8 +26,8 @@ using namespace std;
 int main(int argc, char** argv) {
     
     battleship game;
-    
+
     game.startGame();
-    
+
     return 0;
 }

@@ -14,6 +14,7 @@
 #include <queue>
 
 #include "battleship.h"
+#include "Graph.h"
 
 
 using namespace std;
@@ -66,8 +67,58 @@ void battleship::printpNames() {
   cout << endl;
 };
 
+void battleship::sortShots(list<pair<int,int>>& shots) {
+    
+    pair<int,int>* arr = nullptr;
+    int count=0;
+    list<pair<int,int>>::iterator it;
+    for(it = shots.begin();it != shots.end();it++) {
+        count++;
+    }
+    it = shots.begin();
+    arr = new pair<int,int>[count];
+    for(int i = 0;i < count;i++) {
+        arr[i] = *it++;
+        //cout << arr[i].first << " " << arr[i].second << endl;/// @Debug
+    }
+    
+    bubbleSort(arr,count);
+    count = 0;
+    for(it = shots.begin();it != shots.end();it++) {
+        *it = arr[count++];
+    }
+}
+
+// A function to implement bubble sort
+void battleship::bubbleSort(pair<int,int> arr[], int n)
+{
+    // Base case
+    if (n == 1)
+        return;
+ 
+    int count = 0;
+    // One pass of bubble sort. After
+    // this pass, the largest element
+    // is moved (or bubbled) to end.
+    for (int i=0; i<n-1; i++)
+        if (arr[i] > arr[i+1]){
+            swap(arr[i], arr[i+1]);
+            count++;
+        }
+ 
+      // Check if any recursion happens or not
+      // If any recursion is not happen then return
+      if (count==0)
+           return;
+ 
+    // Largest element is fixed,
+    // recur for remaining array
+    bubbleSort(arr, n-1);
+}
+
 void battleship::startGame() {
     bool gameOver = false;
+    list<pair<int,int>> shots;
     cout << "Welcome to my battleship game. Hope you like it!" << endl;
     trackpNames();
     cout << "Lets Begin. Well have player one place there ships now." << endl << endl;
@@ -89,7 +140,7 @@ void battleship::startGame() {
         cout << "Player one will now shoot there shot!" << endl;
         cout << "Here is your view of player twos map." << endl;
         printShipMap(p2.getMap(),false);
-        shootShip(coords,p2.getMap(),p2.getShips(),p1.getStat());
+        shootShip(coords,p2.getMap(),p2.getShips(),p1.getStat(),shots);
         printShipMap(p2.getMap(),false);
         if (checkLoss(p2.getShips())) {
             cout << "Player one wins by sinking the ships.";
@@ -99,7 +150,7 @@ void battleship::startGame() {
         cout << "Player two will now shoot there shot!" << endl;
         cout << "Here is your view of player ones map." << endl;
         printShipMap(p1.getMap(),false);
-        shootShip(coords,p1.getMap(),p1.getShips(),p2.getStat());
+        shootShip(coords,p1.getMap(),p1.getShips(),p2.getStat(),shots);
         printShipMap(p1.getMap(),false);
         if (checkLoss(p1.getShips())) {
             cout << "Player two wins by sinking the ships.";
@@ -122,6 +173,25 @@ void battleship::startGame() {
             if(choice == 1) {
                 printpNames();
                 
+            }
+            else {
+                cout << "Your loss." << endl;
+            }
+        }
+        else {
+            cout << "Invalid choice." << endl;
+        }
+    }
+    choice = 0;
+    while(choice < 1 || choice > 2) {
+        cout  << endl << "Would you like to see the log off all positions that were shot. (1-Yes) (2-No)" << endl;
+        cin >> choice;
+        if(choice == 1 || choice == 2) {
+            if(choice == 1) {
+                for(list<pair<int,int>>::iterator it = shots.begin();it != shots.end();it++) {
+                    pair<int,int> temp = *it;
+                    cout << temp.first << " " << temp.second << endl;
+                }               
             }
             else {
                 cout << "Your loss." << endl;
@@ -217,6 +287,13 @@ bool battleship::checkFull(int cNum,list<pair<int,int>>& shipMap,int index, ship
 void battleship::placeShip(ship& ship, set<pair<int,int>>& board,list<pair<int,int>>& shipMap) {
     
     int x,y,r;
+    Graph g(10);
+    
+    for(int i = 0 ; i < 10;i++) {
+        for(int j = 0;j < 10;j++) {
+            g.addEdge(i,j);
+        }
+    }
     cout << endl <<"Where would you like to place your ship reference from point (1,1) of your ship" <<endl;
     cout << "Remember the board is a 10x10 (1,1)-(10,10)" <<endl;
     cout <<"Enter the row coordinate for your placement(top->bottom)" << endl;
@@ -228,7 +305,7 @@ void battleship::placeShip(ship& ship, set<pair<int,int>>& board,list<pair<int,i
     cin >> r;
     cin.clear();
     cin.ignore(100, '\n');
-    if(x <= 10 && y <= 10 && r <= 4 && x >=1 && y >= 1 && r >=1) {
+    if(g.findNode(x,y) && r >=1 && r <= 4) {
         switch(r) {
             case 1:
                 if(y-ship.size >= 0) {
@@ -351,24 +428,31 @@ set<pair<int,int>>::iterator battleship::getCoord(set<pair<int,int>>& v,int x,in
 }
 
 
-void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMap, ship* ships, map<char,int>& stats) {
+void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMap, ship* ships, map<char,int>& stats, list<pair<int,int>>& shots) {
     
     int r = 0,
         c = 0,
         index = 0;
-    while(r < 1 || r > 10 || c < 1 || c > 10) {
+    Graph g(10);
+    
+    for(int i = 0 ; i < 10;i++) {
+        for(int j = 0;j < 10;j++) {
+            g.addEdge(i,j);
+        }
+    }
+    do {
         cout << "Where would you like to send you shot?" << endl;
         cout << "Enter the row coordinate now" <<endl;
         cin >> r;
         cout << "Enter the column coordinate now" <<endl;
         cin >> c;
-        
         cin.clear();
         cin.ignore(100, '\n');
         if(r < 1 || r > 10 || c < 1 || c > 10) {
             cout << "Invalid coordinate" << endl;
-        }      
+        }         
     }
+    while(!g.findNode(r,c));
     index = createIndex(board,getCoord(board,r,c));
     //cout << index;
     list<pair<int,int>>::iterator it = shipMap.begin();
@@ -381,11 +465,9 @@ void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMa
         cout << "You missed try harder next time." << endl;
         setShipMap(shipMap,index,8,8);
         pushStat('M',stats);
-        return;
     }
-    if(temp.first == 8 || temp.first == 9) {
+    else if(temp.first == 8 || temp.first == 9) {
         cout << "You have already shot here. How do you mess up that bad?" << endl;
-        return;
     }
     else {
         cout << "You hit ship #" << temp.first << endl;
@@ -398,8 +480,8 @@ void battleship::shootShip(set<pair<int,int>>& board,list<pair<int,int>>& shipMa
 //        cout << endl;
         checkSunk(ships[temp.first - 1]);
         setShipMap(shipMap,index,9,8);
-        return;
     }
+    shots.push_back(make_pair(r,c));
     
 }
 
