@@ -1,0 +1,3 @@
+By comparing our results to the probability of collisions we can see that the max number of collisions does seem to follow trend.
+Another thing to note would be that for the most part our probabilities were under our actual results.
+This could mean that our hash function wasnt very good.

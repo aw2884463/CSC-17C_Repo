@@ -1,0 +1,2 @@
+We can see that the maximum depth for the hashtable is less than the maximum depth of the balanced tree.
+Using this fact we can say that our hash table using the given hash function is better than using a tree.

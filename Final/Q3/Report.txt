@@ -1,0 +1,7 @@
+Static Times:
+	Max customer:12
+	Average wait time: 75 seconds or 1.25 minutes
+
+Var Times:
+	Max customer:16
+	Average wait time: 105 seconds or 1.75 minutes

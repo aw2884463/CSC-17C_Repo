@@ -1,0 +1,3 @@
+Our results do align with my predictions since the number of functions calls gets smaller as you approach zero.
+This is due to us reaching the stop condition quicker as you near zero.
+Another thing to note would be that the gCount is lower since hCount is called in both functions while gCount is not. 

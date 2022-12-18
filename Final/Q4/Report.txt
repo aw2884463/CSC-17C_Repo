@@ -1,0 +1,5 @@
+We can see in the operational analysis that at about 57 elements being sorted the operation count for the modified selection sort surpasses merge sort.
+So merge sort can sort the entire array more efficently than our modified selection sort can sort 57 elements. 
+
+Changing the size of p does change our anlaysis.
+Modified selection sort O(p*n)  but as p>>n O(n^2)
