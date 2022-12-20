@@ -15,7 +15,7 @@
 #include <vector>
 #include <queue>
 #include <utility>
-#include <climits>
+#include <iterator>
 
 using namespace std;
 
@@ -24,7 +24,7 @@ void dijkstra(int source,vector<pair<int, int>>*,int,string []);
 
 int main() {
   
-    
+  srand(static_cast<unsigned int>(time(0)));  
   const int size = 7;
   vector<pair<int, int>> adj[size];
   string names[size] = {"SFO","JFK","DFW","BOS","ORD","MIA","LAX"};
@@ -53,6 +53,8 @@ int main() {
   adj[MIA].push_back(make_pair(DFW, 1124));////////////////
   adj[MIA].push_back(make_pair(JFK, 1093));//Added MIA->JFK
   adj[JFK].push_back(make_pair(MIA, 1093));////////////////
+  adj[MIA].push_back(make_pair(BOS, 1257));//Added MIA->BOS
+  adj[BOS].push_back(make_pair(MIA, 1257));////////////////
   adj[SFO].push_back(make_pair(LAX, 338));//Added SFO->LAX
   adj[LAX].push_back(make_pair(SFO, 338));////////////////
   adj[LAX].push_back(make_pair(DFW, 1234));//Added LAX->DFW
@@ -73,34 +75,32 @@ int main() {
 
  void dijkstra(int source,vector<pair<int, int>>*adj,int N,string names[]) {
   //Holds shortest distances.
-  vector<int> distances(N, INT_MAX);
-
+  vector<int> distances(N, 10000);
   //Priority queue that finds the next node to visit.
   priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
   pq.push(make_pair(0,source)); // Add the source node with distance 0.
-  distances[source] = 0; // distance to source node is 0.
+  distances[source] = 0; // Distance to source node is 0.
 
   //While there are nodes in the queue.
   while (!pq.empty()) {
     //Get the next node to visit.
-    int distance = pq.top().first;
+    int dist = pq.top().first;
     int node = pq.top().second;
     pq.pop();
-
+    cout << "distance:" << dist << "-node:"<< node << endl;
     //If the distance to the node is already shorter, ignore this node.
-    if (distance > distances[node]) continue;
+    if (dist > distances[node]) continue;
 
     //Loop that visit all the neighbors of the node.
-    for (auto neighbor : adj[node]) {
-      int newDistance = distance + neighbor.second; // Distance to neighbor through the current node.
-      int neighborNode = neighbor.first;
-
-      //Updates distances if shorter.
-      if (newDistance < distances[neighborNode]) {
-        distances[neighborNode] = newDistance;
-        pq.push(make_pair(newDistance, neighborNode));
-      }
+    for (vector<pair<int, int>>::iterator it = adj[node].begin();it != adj[node].end();it++) {
+      int neighborNode = it->first; //Current nodes value.
+      int newDist = dist + it->second; // Distance to neighbor through the current node.
       
+      //Updates distances if shorter.
+      if (newDist < distances[neighborNode]) {
+        distances[neighborNode] = newDist;
+        pq.push(make_pair(newDist, neighborNode));
+      }      
     }
   }
 
