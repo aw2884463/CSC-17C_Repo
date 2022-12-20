@@ -16,7 +16,6 @@
 #include <queue>
 #include <utility>
 #include <iterator>
-#include <algorithm>
 
 using namespace std;
 
@@ -78,18 +77,17 @@ int main() {
   //Holds shortest distances.
   vector<int> distances(N, 10000);
   //Priority queue that finds the next node to visit.
-  vector<pair<int, int>> queue;
-  queue.push_back(make_pair(0,source)); // Add the source node with distance 0.
+  priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+  pq.push(make_pair(0,source)); // Add the source node with distance 0.
   distances[source] = 0; // Distance to source node is 0.
 
   //While there are nodes in the queue.
-  while (!queue.empty()) {
-    sort(queue.begin(), queue.end());
+  while (!pq.empty()) {
     //Get the next node to visit.
-    int dist = queue.front().first;
-    int node = queue.front().second;
-    queue.erase(queue.begin());
-    //cout << "distance:" << dist << "-node:"<< node << endl; ///@Debug
+    int dist = pq.top().first;
+    int node = pq.top().second;
+    pq.pop();
+    cout << "distance:" << dist << "-node:"<< node << endl;
     //If the distance to the node is already shorter, ignore this node.
     if (dist > distances[node]) continue;
 
@@ -101,7 +99,7 @@ int main() {
       //Updates distances if shorter.
       if (newDist < distances[neighborNode]) {
         distances[neighborNode] = newDist;
-        queue.push_back(make_pair(newDist, neighborNode));
+        pq.push(make_pair(newDist, neighborNode));
       }      
     }
   }
